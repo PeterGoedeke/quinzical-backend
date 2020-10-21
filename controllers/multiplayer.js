@@ -4,7 +4,7 @@ module.exports = function(io) {
     const random = (min, max) => Math.floor(Math.random() * (max - min) ) + min
     
     function getNewLobbyCode() {
-        const code = random(1000, 10000)
+        const code = random(10000, 100000)
         return lobbies[code] ? getNewLobbyCode : code
     }
     
