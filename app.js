@@ -14,60 +14,28 @@ const app = express()
 
 const server = http.createServer(app)
 
-const url = require('url')
 const jwt = require('jsonwebtoken')
-const lobbies = require('./controllers/multiplayer')
 
-const wsInstance = expressWs(app, server, {
-    wsOptions: {
-        verifyClient: function({ req }, done) {
-            const { query: { token } } = url.parse(req.url, true)
-            console.log('rwlkgjreljkghrkl')
-            try {
-                req.jwt = jwt.verify(token, process.env.TOKEN_SECRET)
-                done(true)
-            }
-            catch (err) {
-                return done(false, 403, 'Invalid token')
-            }
-        }
-    }
-})
-app.ws('/', function(ws, req) {
+const io = require('socket.io')(server)
+const multiplayer = require('./controllers/multiplayer')(io)
+
+io.on('connect', socket => {
     try {
-        console.log('attempting connect')
-        for(const client of wsInstance.getWss().clients) {
-            if(client.jwt && client.jwt._id == req.jwt._id) {
-                console.log('closed client')
-                client.close()
-            }
-        }
-        ws.jwt = req.jwt
-    
-        console.log('sending message')
-        ws.send(JSON.stringify({
-            messageType: 'connected',
-        }))
-    
-        ws.on('message', message => {
-            const response = JSON.parse(message)
-            if (response.type) {
-                lobbies.onMessage(response, ws)
-            }
-            else {
-                console.error('Failed:', message)
-            }
-        })
+        const token = socket.handshake.query.token
+        socket.jwt = jwt.verify(token, process.env.TOKEN_SECRET)
+        console.log('connected');
     }
-    catch(err) {
-        console.log('weird', err)
+    catch (err) {
+        return
     }
+    multiplayer.handle(socket)
 })
 
 var port = process.env.PORT || '3000'
 app.set('port', port);
 
 const authRouter = require('./routes/auth')
+const { log } = require('console')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
