@@ -32,6 +32,7 @@ module.exports = function(io) {
      */
     function handle(socket) {
         socket.on('RESULT', data => {
+            console.log('received result message');
             const code = data.code
             const lobby = lobbies[code]
     
@@ -39,6 +40,7 @@ module.exports = function(io) {
             member.score = data.score
             lobby.membersAnswered ++
             if (lobby.membersAnswered == lobby.members.length) {
+                console.log('emitting round over message');
                 socket.emit('ROUND_OVER', JSON.stringify(lobby.members))
             }
         })
@@ -49,17 +51,14 @@ module.exports = function(io) {
                 host: socket.jwt.username,
                 questions,
                 code,
-                members: [{
-                    _id: socket.jwt._id,
-                    score: 0,
-                    avatar: data.avatar
-                }]
+                members: [data.user]
             }
             lobbies[code] = lobby
             console.log(lobby.code)
             socket.emit('LOBBY_ID', JSON.stringify({ code: lobby.code }))
         })
         socket.on('NEXT_QUESTION', data => {
+            console.log('received next question request');
             const code = data.code
             const lobby = lobbies[code]
             if (lobby.host == socket.jwt.username) {
@@ -67,9 +66,11 @@ module.exports = function(io) {
                 lobby.membersAnswered = 0
     
                 if (lobby.currentQuestion) {
+                    console.log('emitting next question');
                     socket.emit('NEXT_QUESTION', JSON.stringify(lobby.currentQuestion))
                 }
                 else {
+                    console.log('emitting game over');
                     socket.emit('GAME_OVER', JSON.stringify(lobby))
                 }
             }
@@ -78,20 +79,19 @@ module.exports = function(io) {
             }
         })
         socket.on('JOIN_LOBBY', data => {
-            const code = data.code
+            console.log(data)
+            const code = Number(data.code)
             const lobby = lobbies[code]
+            console.log(code, lobbies, lobby)
             if (!lobby) {
-                socket.emit('INVALID_LOBBY', JSON.stringify('Invalid lobby'))
+                socket.emit('INVALID_LOBBY', null)
                 return
             }
-            if (!getMember(lobby, socket.jwt._id)) {
-                lobby.members.push({
-                    _id: socket.jwt._id,
-                    score: 0,
-                    avatar: data.avatar
-                })
+            // if (!getMember(lobby, socket.jwt._id)) {
+                lobby.members.push(data.user)
+                // console.log(JSON.stringify(lobby, null, 4));
                 socket.emit('LOBBY_JOINED', JSON.stringify(lobby))
-            }
+            // }
         })
         socket.on('LEAVE_LOBBY', data => {
             const code = data.code
