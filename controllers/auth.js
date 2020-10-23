@@ -9,7 +9,7 @@ async function register(req, res) {
     if(!val.success) return res.status(400).json(val.error.details[0].message)
 
     const usernameInUse = await User.findOne({ username: req.body.username })
-    if(usernameInUse) return res.status(400).json('Username already exists.')
+    if(usernameInUse) return res.status(400).json({message: 'Username already exists.'})
 
     const salt = await bcrypt.genSalt(10) // most likely too low for production
     const hashedPassword = await bcrypt.hash(req.body.password, salt)
