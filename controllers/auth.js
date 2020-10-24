@@ -6,10 +6,13 @@ const User = require('mongoose').model('User')
 
 async function register(req, res) {
     const val = validate.isRegistration(req.body)
-    if(!val.success) return res.status(400).json(val.error.details[0].message)
+    if(!val.success) {
+        console.log(val.error.details[0].message)
+        return res.status(400).json({ message: val.error.details[0].message })
+    }
 
     const usernameInUse = await User.findOne({ username: req.body.username })
-    if(usernameInUse) return res.status(400).json({message: 'Username already exists.'})
+    if(usernameInUse) return res.status(400).json({ message: 'Username already exists.' })
 
     const salt = await bcrypt.genSalt(10) // most likely too low for production
     const hashedPassword = await bcrypt.hash(req.body.password, salt)
@@ -24,6 +27,7 @@ async function register(req, res) {
         return res.header('auth-token', token).send()
     }
     catch (err) {
+        console.log(err)
         return res.status(400).json(err)
     }
 }
@@ -44,7 +48,7 @@ async function login(req, res) {
 
 async function authorise(req, res, next) {
     const token = req.header('auth-token')
-    if(!token) return res.status(401).json('Access denied; no token provided.')
+    if(!token) return res.status(401).json({ message: 'Access denied; no token provided.' })
 
     try {
         const authorised = jwt.verify(token, process.env.TOKEN_SECRET)

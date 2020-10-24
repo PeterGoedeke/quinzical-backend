@@ -8,9 +8,9 @@ module.exports = function(io) {
         return lobbies[code] ? getNewLobbyCode : code
     }
     
-    function getMember(lobby, _id) {
+    function getMember(lobby, username) {
         for (const member of lobby.members) {
-            if (member._id == _id) {
+            if (member.username == username) {
                 return member
             }
         }
@@ -36,7 +36,8 @@ module.exports = function(io) {
             const code = data.code
             const lobby = lobbies[code]
     
-            const member = getMember(lobby, socket.jwt._id)
+            console.log(lobby.members, socket.jwt.username);
+            const member = getMember(lobby, socket.jwt.username)
             member.score = data.score
             lobby.membersAnswered ++
             if (lobby.membersAnswered == lobby.members.length) {
@@ -54,7 +55,7 @@ module.exports = function(io) {
                 members: [data.user]
             }
             lobbies[code] = lobby
-            console.log(lobby.code)
+            console.log('HOSTED: ', lobby.code, lobby.members)
             socket.emit('LOBBY_ID', JSON.stringify({ code: lobby.code }))
         })
         socket.on('NEXT_QUESTION', data => {
@@ -82,13 +83,13 @@ module.exports = function(io) {
             console.log(data)
             const code = Number(data.code)
             const lobby = lobbies[code]
-            console.log(code, lobbies, lobby)
             if (!lobby) {
                 socket.emit('INVALID_LOBBY', null)
                 return
             }
             // if (!getMember(lobby, socket.jwt._id)) {
                 lobby.members.push(data.user)
+                console.log('JOINED: ', code, lobby.members)
                 // console.log(JSON.stringify(lobby, null, 4));
                 socket.emit('LOBBY_JOINED', JSON.stringify(lobby))
             // }
