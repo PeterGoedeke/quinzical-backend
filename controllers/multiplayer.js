@@ -64,11 +64,21 @@ module.exports = function(io) {
                 host: socket.jwt.username,
                 questions,
                 code,
-                members: [data.user]
+                members: [data.user],
+                questionsAnswered: 0,
+                limit: -1
             }
             lobbies[code] = lobby
             console.log('HOSTED: ', lobby.code, lobby.members)
             socket.emit('LOBBY_ID', JSON.stringify({ code: lobby.code }))
+        })
+        socket.on('SET_LIMIT', data => {
+            const code = data.code
+            const lobby = lobbies[code]
+            if (socket.jwt.username == lobby.host) {
+                lobby.limit = data.limit
+                console.log('set limit to ' + data.limit);
+            }
         })
         socket.on('NEXT_QUESTION', data => {
             console.log('received next question request');
@@ -76,13 +86,14 @@ module.exports = function(io) {
             const lobby = lobbies[code]
             if (lobby.host == socket.jwt.username) {
                 lobby.currentQuestion = lobby.questions.pop()
+                lobby.questionsAnswered ++
                 lobby.membersAnswered = 0
     
                 lobby.members.forEach(member => {
                     member.answer = ''
                     member.status = 'ANSWERING'
                 })
-                if (lobby.currentQuestion) {
+                if (lobby.currentQuestion || lobby.questionsAnswered != lobby.limit) {
                     console.log('emitting next question');
                     messageLobby(code, 'NEXT_QUESTION', {
                         question: lobby.currentQuestion,
