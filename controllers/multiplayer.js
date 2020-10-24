@@ -40,6 +40,7 @@ module.exports = function(io) {
             console.log(lobby.members, socket.jwt.username);
             const member = getMember(lobby, socket.jwt.username)
             member.score = data.score
+            console.log('new score is: ', data.score)
             lobby.membersAnswered ++
             if (lobby.membersAnswered == lobby.members.length) {
                 console.log('emitting round over message');
@@ -88,18 +89,28 @@ module.exports = function(io) {
                 socket.emit('INVALID_LOBBY', null)
                 return
             }
-            // if (!getMember(lobby, socket.jwt._id)) {
+            if (!getMember(lobby, socket.jwt.username)) {
                 lobby.members.push(data.user)
                 console.log('JOINED: ', code, lobby.members)
                 // console.log(JSON.stringify(lobby, null, 4));
                 messageLobby(code, 'LOBBY_JOINED', lobby)
-            // }
+            }
         })
         socket.on('LEAVE_LOBBY', data => {
             const code = data.code
             const lobby = lobbies[code]
+
+            if (!lobby) return
+
+            if (lobby.host == socket.jwt.username) {
+                messageLobby(code, 'LOBBY_CLOSED', null)
+                console.log('lobby closed');
+                lobbies[code] = undefined    
+                return
+            }
             lobby.members = lobby.members.splice(lobby.members.indexOf(getMember(lobby, socket.jwt._id)))
-            messageLobby(code, 'LEFT', socket.jwt.username)
+            console.log('member left the lobby');
+            messageLobby(code, 'LOBBY_LEFT', socket.jwt.username)
         })
     }
     
