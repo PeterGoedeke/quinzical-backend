@@ -18,7 +18,8 @@ module.exports = function(io) {
     }
     
     function messageLobby(code, type, content) {
-        for(const socket of io.sockets.sockets) {
+        for(const socketId in io.sockets.sockets) {
+            const socket = io.sockets.sockets[socketId]
             if (!getMember(lobbies[code], socket.jwt.username)) {
                 continue
             }
