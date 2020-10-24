@@ -40,10 +40,17 @@ module.exports = function(io) {
             console.log(lobby.members, socket.jwt.username);
             const member = getMember(lobby, socket.jwt.username)
             member.score = data.score
+            member.status = data.status
+            member.answer = data.answer
             console.log('new score is: ', data.score)
             lobby.membersAnswered ++
 
-            messageLobby(code, 'SCORE_UPDATE', { username: socket.jwt.username, score: data.score })
+            messageLobby(code, 'SCORE_UPDATE', {
+                username: socket.jwt.username,
+                score: data.score,
+                status: data.status,
+                answer: data.answer
+            })
 
             if (lobby.membersAnswered == lobby.members.length) {
                 console.log('emitting round over message');
@@ -71,9 +78,16 @@ module.exports = function(io) {
                 lobby.currentQuestion = lobby.questions.pop()
                 lobby.membersAnswered = 0
     
+                lobby.members.forEach(member => {
+                    member.answer = ''
+                    member.status = 'ANSWERING'
+                })
                 if (lobby.currentQuestion) {
                     console.log('emitting next question');
-                    messageLobby(code, 'NEXT_QUESTION', lobby.currentQuestion)
+                    messageLobby(code, 'NEXT_QUESTION', {
+                        question: lobby.currentQuestion,
+                        members: lobby.members
+                    })
                 }
                 else {
                     console.log('emitting game over');
