@@ -26,9 +26,10 @@ async function getLeaderboard(req, res) {
         }
         return 0
     })
+
     return res.status(200).json({
         leaderboard: users.slice(0, 10),
-        yourPlace: users.map(user => user._id).indexOf(req.payload._id)
+        yourPlace: users.findIndex(user => user._id == req.payload._id)
     })
 }
 
