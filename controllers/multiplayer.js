@@ -127,7 +127,7 @@ module.exports = function(io) {
             }
             lobby.members = lobby.members.splice(lobby.members.indexOf(getMember(lobby, socket.jwt._id)))
             console.log('member left the lobby');
-            messageLobby(code, 'LOBBY_LEFT', socket.jwt.username)
+            messageLobby(code, 'LOBBY_LEFT', { members: lobby.members })
         })
     }
     
