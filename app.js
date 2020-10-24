@@ -35,12 +35,13 @@ var port = process.env.PORT || '3000'
 app.set('port', port);
 
 const authRouter = require('./routes/auth')
-const { log } = require('console')
+const userRouter = require('./routes/user')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 app.use('/', authRouter)
+app.use('/', userRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
