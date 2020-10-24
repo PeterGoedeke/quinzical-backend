@@ -42,9 +42,12 @@ module.exports = function(io) {
             member.score = data.score
             console.log('new score is: ', data.score)
             lobby.membersAnswered ++
+
+            messageLobby(code, 'SCORE_UPDATE', { username: socket.jwt.username, score: data.score })
+
             if (lobby.membersAnswered == lobby.members.length) {
                 console.log('emitting round over message');
-                messageLobby(code, 'ROUND_OVER', lobby.members)
+                messageLobby(code, 'ROUND_OVER', null)
             }
         })
         socket.on('CREATE_LOBBY', data => {
