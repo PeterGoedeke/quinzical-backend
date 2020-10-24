@@ -43,7 +43,7 @@ module.exports = function(io) {
             lobby.membersAnswered ++
             if (lobby.membersAnswered == lobby.members.length) {
                 console.log('emitting round over message');
-                messageLobby(code, 'ROUND_OVER', JSON.stringify(lobby.members))
+                messageLobby(code, 'ROUND_OVER', lobby.members)
             }
         })
         socket.on('CREATE_LOBBY', data => {
@@ -69,11 +69,11 @@ module.exports = function(io) {
     
                 if (lobby.currentQuestion) {
                     console.log('emitting next question');
-                    messageLobby(code, 'NEXT_QUESTION', JSON.stringify(lobby.currentQuestion))
+                    messageLobby(code, 'NEXT_QUESTION', lobby.currentQuestion)
                 }
                 else {
                     console.log('emitting game over');
-                    messageLobby(code, 'GAME_OVER', JSON.stringify(lobby))
+                    messageLobby(code, 'GAME_OVER', lobby)
                 }
             }
             else {
@@ -92,7 +92,7 @@ module.exports = function(io) {
                 lobby.members.push(data.user)
                 console.log('JOINED: ', code, lobby.members)
                 // console.log(JSON.stringify(lobby, null, 4));
-                messageLobby(code, 'LOBBY_JOINED', JSON.stringify(lobby))
+                messageLobby(code, 'LOBBY_JOINED', lobby)
             // }
         })
         socket.on('LEAVE_LOBBY', data => {
