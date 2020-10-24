@@ -93,7 +93,7 @@ module.exports = function(io) {
                     member.answer = ''
                     member.status = 'ANSWERING'
                 })
-                if (lobby.currentQuestion || lobby.questionsAnswered != lobby.limit) {
+                if (lobby.currentQuestion && lobby.questionsAnswered != lobby.limit) {
                     console.log('emitting next question');
                     messageLobby(code, 'NEXT_QUESTION', {
                         question: lobby.currentQuestion,
@@ -119,7 +119,6 @@ module.exports = function(io) {
             }
             if (!getMember(lobby, socket.jwt.username)) {
                 lobby.members.push(data.user)
-                console.log('JOINED: ', code, lobby.members)
                 // console.log(JSON.stringify(lobby, null, 4));
                 messageLobby(code, 'LOBBY_JOINED', lobby)
             }
