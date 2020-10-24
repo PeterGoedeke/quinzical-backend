@@ -17,9 +17,9 @@ module.exports = function(io) {
         return null
     }
     
-    function messageLobby(id, type, content) {
+    function messageLobby(code, type, content) {
         for(const socket of io.sockets.sockets) {
-            if (!getMember(lobbies[id], socket.jwt._id)) {
+            if (!getMember(lobbies[code], socket.jwt.username)) {
                 continue
             }
             socket.emit(type, JSON.stringify(content))
@@ -42,7 +42,7 @@ module.exports = function(io) {
             lobby.membersAnswered ++
             if (lobby.membersAnswered == lobby.members.length) {
                 console.log('emitting round over message');
-                socket.emit('ROUND_OVER', JSON.stringify(lobby.members))
+                messageLobby(code, 'ROUND_OVER', JSON.stringify(lobby.members))
             }
         })
         socket.on('CREATE_LOBBY', data => {
@@ -68,11 +68,11 @@ module.exports = function(io) {
     
                 if (lobby.currentQuestion) {
                     console.log('emitting next question');
-                    socket.emit('NEXT_QUESTION', JSON.stringify(lobby.currentQuestion))
+                    messageLobby(code, 'NEXT_QUESTION', JSON.stringify(lobby.currentQuestion))
                 }
                 else {
                     console.log('emitting game over');
-                    socket.emit('GAME_OVER', JSON.stringify(lobby))
+                    messageLobby(code, 'GAME_OVER', JSON.stringify(lobby))
                 }
             }
             else {
@@ -91,7 +91,7 @@ module.exports = function(io) {
                 lobby.members.push(data.user)
                 console.log('JOINED: ', code, lobby.members)
                 // console.log(JSON.stringify(lobby, null, 4));
-                socket.emit('LOBBY_JOINED', JSON.stringify(lobby))
+                messageLobby(code, 'LOBBY_JOINED', JSON.stringify(lobby))
             // }
         })
         socket.on('LEAVE_LOBBY', data => {
