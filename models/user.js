@@ -14,6 +14,10 @@ const UserSchema = new mongoose.Schema({
     score: {
         type: Number,
         default: 0
+    },
+    coins: {
+        type: Number,
+        default: 0
     }
 })
 

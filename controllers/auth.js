@@ -43,7 +43,10 @@ async function login(req, res) {
     if(!isValidPassword) return res.status(400).json({ message: 'Username or password incorrect.' })
 
     const token = jwt.sign({ _id: user._id, username: req.body.username }, process.env.TOKEN_SECRET)
-    return res.header('auth-token', token).send()
+    return res.header('auth-token', token).json({
+        score: user.score,
+        coins: user.coins,
+    })
 }
 
 async function authorise(req, res, next) {
