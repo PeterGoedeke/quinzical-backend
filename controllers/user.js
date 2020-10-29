@@ -17,15 +17,7 @@ async function getLeaderboard(req, res) {
         return res.status(404).json({ message: 'Users not found' })
     }
 
-    users.sort((a, b) => {
-        if (a.score < b.score) {
-            return -1
-        }
-        else if (a.score > b.score) {
-            return 1
-        }
-        return 0
-    })
+    users = sortUsers(users);
 
     return res.status(200).json({
         leaderboard: users.slice(0, 10),
@@ -33,7 +25,34 @@ async function getLeaderboard(req, res) {
     })
 }
 
+async function getPublicLeaderboard(req, res) {
+    const users = await User.find({})
+
+    if (!users) {
+        return res.status(404).json({ message: 'Users not found' })
+    }
+
+    users = sortUsers(users);
+
+    return res.status(200).json({
+        leaderboard: users.slice(0, 10),
+    })
+}
+
+const sortUsers = (users) => {
+    users.sort((a, b) => {
+        if (a.score < b.score) {
+            return -1
+        }
+        else if (a.score > b.score) {
+            return 1
+        }
+        return users
+    })
+}
+
 module.exports = {
     updateScore,
-    getLeaderboard
+    getLeaderboard,
+    getPublicLeaderboard
 }
