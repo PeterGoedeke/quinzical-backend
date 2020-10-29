@@ -6,6 +6,7 @@ async function updateScore(req, res) {
         return res.status(404).json({ message: 'Could not find user' })
     }
     user.score = req.body.score
+    user.coins = req.body.coins
     await user.save()
     return res.status(200).json({ message: 'Success' }) 
 }
@@ -17,7 +18,7 @@ async function getLeaderboard(req, res) {
         return res.status(404).json({ message: 'Users not found' })
     }
 
-    users = sortUsers(users);
+    sortUsers(users);
 
     return res.status(200).json({
         leaderboard: users.slice(0, 10),
@@ -32,7 +33,7 @@ async function getPublicLeaderboard(req, res) {
         return res.status(404).json({ message: 'Users not found' })
     }
 
-    users = sortUsers(users);
+    sortUsers(users);
 
     return res.status(200).json({
         leaderboard: users.slice(0, 10),
@@ -42,12 +43,11 @@ async function getPublicLeaderboard(req, res) {
 const sortUsers = (users) => {
     users.sort((a, b) => {
         if (a.score < b.score) {
-            return -1
-        }
-        else if (a.score > b.score) {
             return 1
         }
-        return users
+        else if (a.score > b.score) {
+            return -1
+        }
     })
 }
 
