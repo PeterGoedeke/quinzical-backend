@@ -90,10 +90,10 @@ module.exports = function(io) {
                 lobby.membersAnswered = 0
     
                 lobby.members.forEach(member => {
-                    member.answer = ''
+                    member.answer = '...'
                     member.status = 'ANSWERING'
                 })
-                if (lobby.currentQuestion && lobby.questionsAnswered != lobby.limit) {
+                if (lobby.currentQuestion && lobby.questionsAnswered < lobby.limit) {
                     console.log('emitting next question');
                     messageLobby(code, 'NEXT_QUESTION', {
                         question: lobby.currentQuestion,
