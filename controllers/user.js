@@ -22,7 +22,7 @@ async function getLeaderboard(req, res) {
 
     return res.status(200).json({
         leaderboard: users.slice(0, 10),
-        yourPlace: users.findIndex(user => user._id == req.payload._id)
+        yourPlace: users.findIndex(user => user._id == req.payload._id) + 1
     })
 }
 
