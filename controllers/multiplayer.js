@@ -93,7 +93,7 @@ module.exports = function(io) {
                     member.answer = '...'
                     member.status = 'ANSWERING'
                 })
-                if (lobby.currentQuestion && lobby.questionsAnswered < lobby.limit) {
+                if (lobby.currentQuestion && (lobby.limit == -1 || lobby.questionsAnswered < lobby.limit)) {
                     console.log('emitting next question');
                     messageLobby(code, 'NEXT_QUESTION', {
                         question: lobby.currentQuestion,
